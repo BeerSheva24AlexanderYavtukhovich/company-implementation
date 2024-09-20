@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-abstract class CompanyTest {
+class CompanyTest {
 	private static final long ID1 = 123;
 	private static final int SALARY1 = 1000;
 	private static final String DEPARTMENT1 = "QA";
@@ -48,7 +48,6 @@ abstract class CompanyTest {
 	void testAddEmployee() {
 		Employee empl = new Employee(ID4, SALARY1, DEPARTMENT1);
 		company.addEmployee(empl);
-		//if employee with id already exist - return exc
 		assertThrowsExactly(IllegalStateException.class,
 				() -> company.addEmployee(empl));
 		assertThrowsExactly(IllegalStateException.class,
@@ -64,7 +63,6 @@ abstract class CompanyTest {
 	@Test
 	void testRemoveEmployee() {
 		assertEquals(empl1, company.removeEmployee(ID1));
-		//if employee doesnt exist in company
 		assertThrowsExactly(NoSuchElementException.class,
 				() -> company.removeEmployee(ID1));
 	}

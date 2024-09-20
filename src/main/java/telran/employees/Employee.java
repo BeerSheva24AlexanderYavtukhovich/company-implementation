@@ -25,8 +25,16 @@ public class Employee {
 
     @Override
     public boolean equals(Object obj) {
-        // TODO
-        // according to id only
-        throw new UnsupportedOperationException();
+        boolean isEqual = false;
+        if (obj != null && getClass() == obj.getClass()) {
+            Employee empl = (Employee) obj;
+            isEqual = this.getId() == empl.getId();
+        }
+        return isEqual;
+    }
+
+    @Override
+    public int hashCode() {
+        return Long.hashCode(getId());
     }
 }
