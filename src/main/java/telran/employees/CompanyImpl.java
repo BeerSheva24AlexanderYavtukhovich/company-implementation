@@ -1,11 +1,11 @@
 package telran.employees;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.TreeMap;
 
@@ -14,15 +14,9 @@ public class CompanyImpl implements Company {
     private HashMap<String, List<Employee>> employeesDepartment = new HashMap<>();
     private TreeMap<Float, List<Manager>> managersFactor = new TreeMap<>();
 
-    public class CompanyIterator implements Iterator<Employee> {
-        private Iterator<Employee> iterator;
-        private Map<String, List<Employee>> employeesDepartment;
+    private class CompanyIterator implements Iterator<Employee> {
+        private final Iterator<Employee> iterator = employees.values().iterator();
         private Employee lastEmployee;
-
-        public CompanyIterator(Iterator<Employee> iterator, Map<String, List<Employee>> employeesDepartment) {
-            this.iterator = iterator;
-            this.employeesDepartment = employeesDepartment;
-        }
 
         @Override
         public boolean hasNext() {
@@ -37,18 +31,15 @@ public class CompanyImpl implements Company {
 
         @Override
         public void remove() {
-            if (lastEmployee == null) {
-                throw new IllegalStateException();
-            }
             iterator.remove();
-            removeEmployeeFromDepartment(lastEmployee);
+            removeEmployeeFromLists(lastEmployee);
             lastEmployee = null;
         }
     }
 
     @Override
     public Iterator<Employee> iterator() {
-        return new CompanyIterator(employees.values().iterator(), employeesDepartment);
+        return new CompanyIterator();
     }
 
     @Override
@@ -59,6 +50,9 @@ public class CompanyImpl implements Company {
         employees.put(empl.getId(), empl);
         String department = empl.getDepartment();
         employeesDepartment.computeIfAbsent(department, k -> new ArrayList<>()).add(empl);
+        if (empl instanceof Manager manager) {
+            managersFactor.computeIfAbsent(manager.getFactor(), k -> new LinkedList<>()).add(manager);
+        }
     }
 
     @Override
@@ -71,26 +65,21 @@ public class CompanyImpl implements Company {
         if (!employees.containsKey(id)) {
             throw new NoSuchElementException();
         }
-        Employee empl = employees.remove(id);
-        removeEmployeeFromDepartment(empl);
-        return empl;
+        Employee removedEmployee = employees.remove(id);
+        removeEmployeeFromLists(removedEmployee);
+        return removedEmployee;
     }
 
     @Override
-    public int getDepartmentBudget(String department) {
-        HashMap<String, Integer> departmentBudgetsMap = calculateDepartmentBudgets();
-        return departmentBudgetsMap.getOrDefault(department, 0);
-    }
-
-    private HashMap<String, Integer> calculateDepartmentBudgets() {
-        HashMap<String, Integer> budgetsMap = new HashMap<>();
-        employeesDepartment.forEach((department, employees) -> {
-            int totalBudget = employees.stream()
+    public int getDepartmentBudget(String departmentName) {
+        int budget = 0;
+        List<Employee> employeesInDepartment = employeesDepartment.get(departmentName);
+        if (employeesInDepartment != null) {
+            budget = employeesInDepartment.stream()
                     .mapToInt(Employee::computeSalary)
                     .sum();
-            budgetsMap.put(department, totalBudget);
-        });
-        return budgetsMap;
+        }
+        return budget;
     }
 
     @Override
@@ -100,29 +89,39 @@ public class CompanyImpl implements Company {
 
     @Override
     public Manager[] getManagersWithMostFactor() {
-        TreeMap<Float, List<Manager>> factorToManagersMap = new TreeMap<>(Comparator.reverseOrder());
+        Entry<Float, List<Manager>> lastEntry = managersFactor.lastEntry();
+        Manager[] managers = new Manager[0];
+        if (lastEntry != null) {
+            managers = lastEntry.getValue().stream().toArray(Manager[]::new);
+        }
+        return managers;
+    }
 
-        employees.values().stream()
-                .filter(empl -> empl instanceof Manager)
-                .map(empl -> (Manager) empl)
-                .forEach(manager -> {
-                    float factor = manager.getFactor();
-                    factorToManagersMap.computeIfAbsent(factor, k -> new ArrayList<>()).add(manager);
-                });
-
-        return factorToManagersMap.isEmpty()
-                ? new Manager[0]
-                : factorToManagersMap.firstEntry().getValue().toArray(new Manager[0]);
+    private void removeEmployeeFromLists(Employee empl) {
+        removeEmployeeFromDepartment(empl);
+        if (empl instanceof Manager manager) {
+            removeManagerFromManagersFactor(manager);
+        }
     }
 
     private void removeEmployeeFromDepartment(Employee empl) {
         String department = empl.getDepartment();
         List<Employee> departmentEmployees = employeesDepartment.get(department);
-        if (departmentEmployees != null) {
-            boolean removed = departmentEmployees.remove(empl);
-            if (removed && departmentEmployees.isEmpty()) {
-                employeesDepartment.remove(department);
+        departmentEmployees.remove(empl);
+        if (departmentEmployees.isEmpty()) {
+            employeesDepartment.remove(department);
+        }
+    }
+
+    private void removeManagerFromManagersFactor(Manager manager) {
+        Float factor = manager.getFactor();
+        List<Manager> listManagers = managersFactor.get(factor);
+        if (listManagers != null) {
+            listManagers.remove(manager);
+            if (listManagers.isEmpty()) {
+                managersFactor.remove(factor);
             }
         }
     }
+
 }
