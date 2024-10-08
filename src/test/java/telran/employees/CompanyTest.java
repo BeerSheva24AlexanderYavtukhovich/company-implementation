@@ -11,7 +11,10 @@ import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import telran.io.Persistable;
+
 class CompanyTest {
+	private static final String DATA_FILE_NAME = "company.data";
 	private static final long ID1 = 123;
 	private static final int SALARY1 = 1000;
 	private static final String DEPARTMENT1 = "QA";
@@ -76,8 +79,12 @@ class CompanyTest {
 
 	@Test
 	void testIterator() {
+		runTestIterator(company);
+	}
+
+	private void runTestIterator(Company companyPar) {
 		Employee[] expected = { empl2, empl1, empl3 };
-		Iterator<Employee> it = company.iterator();
+		Iterator<Employee> it = companyPar.iterator();
 		int index = 0;
 		while (it.hasNext()) {
 			assertEquals(expected[index++], it.next());
@@ -134,5 +141,32 @@ class CompanyTest {
 		assertEquals(0, company.getDepartmentBudget(DEPARTMENT2));
 		assertArrayEquals(new Manager[0], company.getManagersWithMostFactor());
 		assertArrayEquals(new String[] { DEPARTMENT1 }, company.getDepartments());
+	}
+
+	@Test
+	void jsonTest() {
+		for (Employee empl : new Employee[] { empl1, empl2, empl3 }) {
+			System.out.println(empl);
+		}
+
+		Employee wageEmployee = Employee.getEmployeeFromJSON(
+				"{\"hours\":10,\"basicSalary\":1000,\"className\":\"telran.employees.WageEmployee\",\"id\":123,\"department\":\"QA\",\"wage\":100}");
+		Employee manager = Employee.getEmployeeFromJSON(
+				"{\"basicSalary\":2000,\"className\":\"telran.employees.Manager\",\"id\":120,\"department\":\"QA\",\"factor\":2}");
+		Employee salesPerson = Employee.getEmployeeFromJSON(
+				"{\"hours\":10,\"basicSalary\":3000,\"className\":\"telran.employees.SalesPerson\",\"id\":125,\"department\":\"Development\",\"percent\":0.01,\"sales\":10000,\"wage\":100}");
+		assertEquals(wageEmployee, new WageEmployee(ID1, SALARY1, DEPARTMENT1, WAGE1, HOURS1));
+		assertEquals(manager, new Manager(ID2, SALARY2, DEPARTMENT1, FACTOR1));
+		assertEquals(salesPerson, new SalesPerson(ID3, SALARY3, DEPARTMENT2, WAGE1, HOURS1, PERCENT1, SALES1));
+	}
+
+	@Test
+	void persistenceTest() {
+		if (company instanceof Persistable persCompany) {
+			persCompany.saveTofile(DATA_FILE_NAME);
+			CompanyImpl comp = new CompanyImpl();
+			comp.restoreFromFile(DATA_FILE_NAME);
+			runTestIterator(comp);
+		}
 	}
 }
