@@ -1,5 +1,9 @@
 package telran.employees;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -7,7 +11,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
+import java.util.StringJoiner;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import telran.io.Persistable;
 
@@ -128,14 +134,57 @@ public class CompanyImpl implements Company, Persistable {
 
     @Override
     public void saveTofile(String fileName) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'saveTofile'");
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+            StringJoiner joiner = new StringJoiner(",", "[", "]");
+
+            for (Employee employee : employees.values()) {
+                joiner.add(employee.toString());
+            }
+
+            writer.write(joiner.toString());
+        } catch (Exception e) {
+            e.getMessage();
+        }
     }
 
     @Override
     public void restoreFromFile(String fileName) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'restoreFromFile'");
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+            String[] jsonObjects = getJsonObjectsFromFile(reader);
+            clearCompany();
+            getAndAddEmployees(jsonObjects);
+        } catch (Exception e) {
+            e.getMessage();
+        }
+    }
+
+    private String[] getJsonObjectsFromFile(BufferedReader reader) {
+        String jsonString = reader.lines().collect(Collectors.joining()).trim();
+        if (jsonString.isEmpty() || jsonString.equals("[]")) {
+            throw new IllegalArgumentException("Empty file!");
+        }
+
+        if (jsonString.startsWith("[") && jsonString.endsWith("]")) {
+            jsonString = jsonString.substring(1, jsonString.length() - 1);
+        }
+        String[] jsonObjects = jsonString.split("(?<=\\}),\\s*(?=\\{)");
+        for (int i = 0; i < jsonObjects.length; i++) {
+            jsonObjects[i] = jsonObjects[i].trim();
+        }
+        return jsonObjects;
+    }
+
+    private void getAndAddEmployees(String[] jsonObjects) {
+        for (String jsonObject : jsonObjects) {
+            Employee employee = Employee.getEmployeeFromJSON(jsonObject);
+            employees.put(employee.getId(), employee);
+        }
+    }
+
+    private void clearCompany() {
+        employees.clear();
+        employeesDepartment.clear();
+        managersFactor.clear();
     }
 
 }

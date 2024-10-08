@@ -145,26 +145,35 @@ class CompanyTest {
 
 	@Test
 	void jsonTest() {
-		for (Employee empl : new Employee[] { empl1, empl2, empl3 }) {
-			System.out.println(empl);
-		}
-
-		Employee wageEmployee = Employee.getEmployeeFromJSON(
-				"{\"hours\":10,\"basicSalary\":1000,\"className\":\"telran.employees.WageEmployee\",\"id\":123,\"department\":\"QA\",\"wage\":100}");
-		Employee manager = Employee.getEmployeeFromJSON(
-				"{\"basicSalary\":2000,\"className\":\"telran.employees.Manager\",\"id\":120,\"department\":\"QA\",\"factor\":2}");
-		Employee salesPerson = Employee.getEmployeeFromJSON(
-				"{\"hours\":10,\"basicSalary\":3000,\"className\":\"telran.employees.SalesPerson\",\"id\":125,\"department\":\"Development\",\"percent\":0.01,\"sales\":10000,\"wage\":100}");
-		assertEquals(wageEmployee, new WageEmployee(ID1, SALARY1, DEPARTMENT1, WAGE1, HOURS1));
-		assertEquals(manager, new Manager(ID2, SALARY2, DEPARTMENT1, FACTOR1));
-		assertEquals(salesPerson, new SalesPerson(ID3, SALARY3, DEPARTMENT2, WAGE1, HOURS1, PERCENT1, SALES1));
+		Employee wageEmployee = createAndCompareEmployee(
+			"{\"hours\":10,\"basicSalary\":1000,\"className\":\"telran.employees.WageEmployee\",\"id\":123,\"department\":\"QA\",\"wage\":100}",
+			new WageEmployee(ID1, SALARY1, DEPARTMENT1, WAGE1, HOURS1)
+		);
+	
+		Employee manager = createAndCompareEmployee(
+			"{\"basicSalary\":2000,\"className\":\"telran.employees.Manager\",\"id\":120,\"department\":\"QA\",\"factor\":2}",
+			new Manager(ID2, SALARY2, DEPARTMENT1, FACTOR1)
+		);
+	
+		Employee salesPerson = createAndCompareEmployee(
+			"{\"hours\":10,\"basicSalary\":3000,\"className\":\"telran.employees.SalesPerson\",\"id\":125,\"department\":\"Development\",\"percent\":0.01,\"sales\":10000,\"wage\":100}",
+			new SalesPerson(ID3, SALARY3, DEPARTMENT2, WAGE1, HOURS1, PERCENT1, SALES1)
+		);
+	}
+	
+	private Employee createAndCompareEmployee(String json, Employee expectedEmployee) {
+		Employee employee = Employee.getEmployeeFromJSON(json);
+		assertEquals(expectedEmployee, employee);
+		return employee;
 	}
 
 	@Test
 	void persistenceTest() {
 		if (company instanceof Persistable persCompany) {
-			persCompany.saveTofile(DATA_FILE_NAME);
 			CompanyImpl comp = new CompanyImpl();
+			assertThrowsExactly(IllegalArgumentException.class,
+					() -> comp.restoreFromFile(DATA_FILE_NAME));
+			persCompany.saveTofile(DATA_FILE_NAME);
 			comp.restoreFromFile(DATA_FILE_NAME);
 			runTestIterator(comp);
 		}
