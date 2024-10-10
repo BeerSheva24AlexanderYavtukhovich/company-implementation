@@ -146,21 +146,18 @@ class CompanyTest {
 	@Test
 	void jsonTest() {
 		Employee wageEmployee = createAndCompareEmployee(
-			"{\"hours\":10,\"basicSalary\":1000,\"className\":\"telran.employees.WageEmployee\",\"id\":123,\"department\":\"QA\",\"wage\":100}",
-			new WageEmployee(ID1, SALARY1, DEPARTMENT1, WAGE1, HOURS1)
-		);
-	
+				"{\"hours\":10,\"basicSalary\":1000,\"className\":\"telran.employees.WageEmployee\",\"id\":123,\"department\":\"QA\",\"wage\":100}",
+				new WageEmployee(ID1, SALARY1, DEPARTMENT1, WAGE1, HOURS1));
+
 		Employee manager = createAndCompareEmployee(
-			"{\"basicSalary\":2000,\"className\":\"telran.employees.Manager\",\"id\":120,\"department\":\"QA\",\"factor\":2}",
-			new Manager(ID2, SALARY2, DEPARTMENT1, FACTOR1)
-		);
-	
+				"{\"basicSalary\":2000,\"className\":\"telran.employees.Manager\",\"id\":120,\"department\":\"QA\",\"factor\":2}",
+				new Manager(ID2, SALARY2, DEPARTMENT1, FACTOR1));
+
 		Employee salesPerson = createAndCompareEmployee(
-			"{\"hours\":10,\"basicSalary\":3000,\"className\":\"telran.employees.SalesPerson\",\"id\":125,\"department\":\"Development\",\"percent\":0.01,\"sales\":10000,\"wage\":100}",
-			new SalesPerson(ID3, SALARY3, DEPARTMENT2, WAGE1, HOURS1, PERCENT1, SALES1)
-		);
+				"{\"hours\":10,\"basicSalary\":3000,\"className\":\"telran.employees.SalesPerson\",\"id\":125,\"department\":\"Development\",\"percent\":0.01,\"sales\":10000,\"wage\":100}",
+				new SalesPerson(ID3, SALARY3, DEPARTMENT2, WAGE1, HOURS1, PERCENT1, SALES1));
 	}
-	
+
 	private Employee createAndCompareEmployee(String json, Employee expectedEmployee) {
 		Employee employee = Employee.getEmployeeFromJSON(json);
 		assertEquals(expectedEmployee, employee);
@@ -171,7 +168,7 @@ class CompanyTest {
 	void persistenceTest() {
 		if (company instanceof Persistable persCompany) {
 			CompanyImpl comp = new CompanyImpl();
-			assertThrowsExactly(IllegalArgumentException.class,
+			assertThrowsExactly(RuntimeException.class,
 					() -> comp.restoreFromFile(DATA_FILE_NAME));
 			persCompany.saveTofile(DATA_FILE_NAME);
 			comp.restoreFromFile(DATA_FILE_NAME);
