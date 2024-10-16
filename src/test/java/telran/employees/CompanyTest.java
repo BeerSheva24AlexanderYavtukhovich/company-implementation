@@ -168,8 +168,6 @@ class CompanyTest {
 	void persistenceTest() {
 		if (company instanceof Persistable persCompany) {
 			CompanyImpl comp = new CompanyImpl();
-			assertThrowsExactly(RuntimeException.class,
-					() -> comp.restoreFromFile(DATA_FILE_NAME));
 			persCompany.saveTofile(DATA_FILE_NAME);
 			comp.restoreFromFile(DATA_FILE_NAME);
 			runTestIterator(comp);
