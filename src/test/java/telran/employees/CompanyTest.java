@@ -168,7 +168,7 @@ class CompanyTest {
 	void persistenceTest() {
 		if (company instanceof Persistable persCompany) {
 			CompanyImpl comp = new CompanyImpl();
-			persCompany.saveTofile(DATA_FILE_NAME);
+			persCompany.saveToFile(DATA_FILE_NAME);
 			comp.restoreFromFile(DATA_FILE_NAME);
 			runTestIterator(comp);
 		}
