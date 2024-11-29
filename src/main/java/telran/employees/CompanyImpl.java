@@ -180,14 +180,14 @@ public class CompanyImpl implements Company, Persistable {
 
     @Override
     public void restoreFromFile(String fileName) {
-        writeLock.lock();
+        readLock.lock();
         try (BufferedReader reader = Files.newBufferedReader(Path.of(fileName))) {
             reader.lines().map(Employee::getEmployeeFromJSON).forEach(this::addEmployee);
         } catch (FileNotFoundException e) {
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
-            writeLock.unlock();
+            readLock.unlock();
         }
     }
 
