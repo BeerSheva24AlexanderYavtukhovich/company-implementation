@@ -22,9 +22,9 @@ public class CompanyImpl implements Company, Persistable {
     private TreeMap<Long, Employee> employees = new TreeMap<>();
     private HashMap<String, List<Employee>> employeesDepartment = new HashMap<>();
     private TreeMap<Float, List<Manager>> managersFactor = new TreeMap<>();
-    private static ReentrantReadWriteLock rw_lock = new ReentrantReadWriteLock();
-    private static Lock readLock = rw_lock.readLock();
-    private static Lock writeLock = rw_lock.writeLock();
+    private final ReentrantReadWriteLock rw_lock = new ReentrantReadWriteLock();
+    private final Lock readLock = rw_lock.readLock();
+    private final Lock writeLock = rw_lock.writeLock();
 
     private class CompanyIterator implements Iterator<Employee> {
         Iterator<Employee> iterator = employees.values().iterator();
