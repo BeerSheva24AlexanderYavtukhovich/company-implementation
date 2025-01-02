@@ -1,9 +1,9 @@
 package telran.employees;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -180,14 +180,11 @@ public class CompanyImpl implements Company, Persistable {
 
     @Override
     public void restoreFromFile(String fileName) {
-        readLock.lock();
         try (BufferedReader reader = Files.newBufferedReader(Path.of(fileName))) {
             reader.lines().map(Employee::getEmployeeFromJSON).forEach(this::addEmployee);
-        } catch (FileNotFoundException e) {
+        } catch (NoSuchFileException e) {
         } catch (Exception e) {
             throw new RuntimeException(e);
-        } finally {
-            readLock.unlock();
         }
     }
 
