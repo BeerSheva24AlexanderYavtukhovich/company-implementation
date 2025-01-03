@@ -78,4 +78,8 @@ public class Employee {
         jsonObj.put("basicSalary", basicSalary);
         jsonObj.put("department", department);
     }
+
+    public int getBasicSalary() {
+        return basicSalary;
+    }
 }

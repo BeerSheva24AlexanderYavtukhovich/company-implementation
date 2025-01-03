@@ -14,30 +14,12 @@ import org.junit.jupiter.api.Test;
 import telran.io.Persistable;
 
 class CompanyTest {
-	private static final String DATA_FILE_NAME = "company.data";
-	private static final long ID1 = 123;
-	private static final int SALARY1 = 1000;
-	private static final String DEPARTMENT1 = "QA";
-	private static final long ID2 = 120;
-	private static final int SALARY2 = 2000;
-	private static final long ID3 = 125;
-	private static final int SALARY3 = 3000;
-	private static final String DEPARTMENT2 = "Development";
-	private static final long ID4 = 200;
-	private static final String DEPARTMENT4 = "Audit";
-	private static final int WAGE1 = 100;
-	private static final int HOURS1 = 10;
-	private static final float FACTOR1 = 2;
-	private static final float PERCENT1 = 0.01f;
-	private static final long SALES1 = 10000;
-	private static final float FACTOR2 = 2.5f;
-	private static final long ID5 = 300;
-	private static final float FACTOR3 = 3;
-	private static final long ID6 = 400;
-	private static final long ID7 = 500;
-	Employee empl1 = new WageEmployee(ID1, SALARY1, DEPARTMENT1, WAGE1, HOURS1);
-	Employee empl2 = new Manager(ID2, SALARY2, DEPARTMENT1, FACTOR1);
-	Employee empl3 = new SalesPerson(ID3, SALARY3, DEPARTMENT2, WAGE1, HOURS1, PERCENT1, SALES1);
+
+	Employee empl1 = new WageEmployee(Constants.ID1, Constants.SALARY1, Constants.DEPARTMENT1, Constants.WAGE1,
+			Constants.HOURS1);
+	Employee empl2 = new Manager(Constants.ID2, Constants.SALARY2, Constants.DEPARTMENT1, Constants.FACTOR1);
+	Employee empl3 = new SalesPerson(Constants.ID3, Constants.SALARY3, Constants.DEPARTMENT2, Constants.WAGE1,
+			Constants.HOURS1, Constants.PERCENT1, Constants.SALES1);
 	Company company = new CompanyImpl();
 
 	@BeforeEach
@@ -49,7 +31,7 @@ class CompanyTest {
 
 	@Test
 	void testAddEmployee() {
-		Employee empl = new Employee(ID4, SALARY1, DEPARTMENT1);
+		Employee empl = new Employee(Constants.ID4, Constants.SALARY1, Constants.DEPARTMENT1);
 		company.addEmployee(empl);
 		assertThrowsExactly(IllegalStateException.class,
 				() -> company.addEmployee(empl));
@@ -59,22 +41,25 @@ class CompanyTest {
 
 	@Test
 	void testGetEmployee() {
-		assertEquals(empl1, company.getEmployee(ID1));
-		assertNull(company.getEmployee(ID4));
+		assertEquals(empl1, company.getEmployee(Constants.ID1));
+		assertNull(company.getEmployee(Constants.ID4));
 	}
 
 	@Test
 	void testRemoveEmployee() {
-		assertEquals(empl1, company.removeEmployee(ID1));
+		assertEquals(empl1, company.removeEmployee(Constants.ID1));
 		assertThrowsExactly(NoSuchElementException.class,
-				() -> company.removeEmployee(ID1));
+				() -> company.removeEmployee(Constants.ID1));
 	}
 
 	@Test
 	void testGetDepartmentBudget() {
-		assertEquals(SALARY1 + WAGE1 * HOURS1 + SALARY2 * FACTOR1, company.getDepartmentBudget(DEPARTMENT1));
-		assertEquals(SALARY3 + WAGE1 * HOURS1 + PERCENT1 * SALES1 / 100, company.getDepartmentBudget(DEPARTMENT2));
-		assertEquals(0, company.getDepartmentBudget(DEPARTMENT4));
+		assertEquals(Constants.SALARY1 + Constants.WAGE1 * Constants.HOURS1 + Constants.SALARY2 * Constants.FACTOR1,
+				company.getDepartmentBudget(Constants.DEPARTMENT1));
+		assertEquals(
+				Constants.SALARY3 + Constants.WAGE1 * Constants.HOURS1 + Constants.PERCENT1 * Constants.SALES1 / 100,
+				company.getDepartmentBudget(Constants.DEPARTMENT2));
+		assertEquals(0, company.getDepartmentBudget(Constants.DEPARTMENT4));
 	}
 
 	@Test
@@ -95,31 +80,32 @@ class CompanyTest {
 
 	@Test
 	void testGetDepartments() {
-		String[] expected = { DEPARTMENT1, DEPARTMENT2 };
+		String[] expected = { Constants.DEPARTMENT1, Constants.DEPARTMENT2 };
 		Arrays.sort(expected);
 		assertArrayEquals(expected, company.getDepartments());
-		expected = new String[] { DEPARTMENT1 };
-		company.removeEmployee(ID3);
+		expected = new String[] { Constants.DEPARTMENT1 };
+		company.removeEmployee(Constants.ID3);
 		assertArrayEquals(expected, company.getDepartments());
 	}
 
 	@Test
 	void testGetManagersWithMostFactor() {
-		company.addEmployee(new Manager(ID4, SALARY1, DEPARTMENT1, FACTOR2));
-		Manager[] managersExpected = { new Manager(ID5, SALARY1, DEPARTMENT1, FACTOR3),
-				new Manager(ID6, SALARY1, DEPARTMENT1, FACTOR3),
-				new Manager(ID7, SALARY1, DEPARTMENT2, FACTOR3)
+		company.addEmployee(new Manager(Constants.ID4, Constants.SALARY1, Constants.DEPARTMENT1, Constants.FACTOR2));
+		Manager[] managersExpected = {
+				new Manager(Constants.ID5, Constants.SALARY1, Constants.DEPARTMENT1, Constants.FACTOR3),
+				new Manager(Constants.ID6, Constants.SALARY1, Constants.DEPARTMENT1, Constants.FACTOR3),
+				new Manager(Constants.ID7, Constants.SALARY1, Constants.DEPARTMENT2, Constants.FACTOR3)
 		};
 		for (Manager mng : managersExpected) {
 			company.addEmployee(mng);
 		}
 		assertArrayEquals(managersExpected, company.getManagersWithMostFactor());
-		company.removeEmployee(ID4);
-		company.removeEmployee(ID5);
-		company.removeEmployee(ID6);
-		company.removeEmployee(ID7);
+		company.removeEmployee(Constants.ID4);
+		company.removeEmployee(Constants.ID5);
+		company.removeEmployee(Constants.ID6);
+		company.removeEmployee(Constants.ID7);
 		assertArrayEquals(new Manager[] { (Manager) empl2 }, company.getManagersWithMostFactor());
-		company.removeEmployee(ID2);
+		company.removeEmployee(Constants.ID2);
 		assertArrayEquals(new Manager[0], company.getManagersWithMostFactor());
 
 	}
@@ -135,27 +121,29 @@ class CompanyTest {
 		}
 		assertThrowsExactly(IllegalStateException.class, it::remove);
 		assertThrowsExactly(NoSuchElementException.class,
-				() -> company.removeEmployee(ID2));
+				() -> company.removeEmployee(Constants.ID2));
 		assertThrowsExactly(NoSuchElementException.class,
-				() -> company.removeEmployee(ID3));
-		assertEquals(0, company.getDepartmentBudget(DEPARTMENT2));
+				() -> company.removeEmployee(Constants.ID3));
+		assertEquals(0, company.getDepartmentBudget(Constants.DEPARTMENT2));
 		assertArrayEquals(new Manager[0], company.getManagersWithMostFactor());
-		assertArrayEquals(new String[] { DEPARTMENT1 }, company.getDepartments());
+		assertArrayEquals(new String[] { Constants.DEPARTMENT1 }, company.getDepartments());
 	}
 
 	@Test
 	void jsonTest() {
 		Employee wageEmployee = createAndCompareEmployee(
 				"{\"hours\":10,\"basicSalary\":1000,\"className\":\"telran.employees.WageEmployee\",\"id\":123,\"department\":\"QA\",\"wage\":100}",
-				new WageEmployee(ID1, SALARY1, DEPARTMENT1, WAGE1, HOURS1));
+				new WageEmployee(Constants.ID1, Constants.SALARY1, Constants.DEPARTMENT1, Constants.WAGE1,
+						Constants.HOURS1));
 
 		Employee manager = createAndCompareEmployee(
 				"{\"basicSalary\":2000,\"className\":\"telran.employees.Manager\",\"id\":120,\"department\":\"QA\",\"factor\":2}",
-				new Manager(ID2, SALARY2, DEPARTMENT1, FACTOR1));
+				new Manager(Constants.ID2, Constants.SALARY2, Constants.DEPARTMENT1, Constants.FACTOR1));
 
 		Employee salesPerson = createAndCompareEmployee(
 				"{\"hours\":10,\"basicSalary\":3000,\"className\":\"telran.employees.SalesPerson\",\"id\":125,\"department\":\"Development\",\"percent\":0.01,\"sales\":10000,\"wage\":100}",
-				new SalesPerson(ID3, SALARY3, DEPARTMENT2, WAGE1, HOURS1, PERCENT1, SALES1));
+				new SalesPerson(Constants.ID3, Constants.SALARY3, Constants.DEPARTMENT2, Constants.WAGE1,
+						Constants.HOURS1, Constants.PERCENT1, Constants.SALES1));
 	}
 
 	private Employee createAndCompareEmployee(String json, Employee expectedEmployee) {
@@ -168,8 +156,8 @@ class CompanyTest {
 	void persistenceTest() {
 		if (company instanceof Persistable persCompany) {
 			CompanyImpl comp = new CompanyImpl();
-			persCompany.saveToFile(DATA_FILE_NAME);
-			comp.restoreFromFile(DATA_FILE_NAME);
+			persCompany.saveToFile(Constants.DATA_FILE_NAME);
+			comp.restoreFromFile(Constants.DATA_FILE_NAME);
 			runTestIterator(comp);
 		}
 	}

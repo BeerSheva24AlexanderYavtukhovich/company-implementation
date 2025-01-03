@@ -1,3 +1,3 @@
-# HW30 Company implementation
-# HW34 saveTofile, restoreFromFile
-# HW45 synchronization policy with the maximal concurrency
+# HW 53 
+## OOD implementation for converting any Employee DTO object to appropriate EmployeeEntity object and vice versa
+## EmployeesMapperTest
